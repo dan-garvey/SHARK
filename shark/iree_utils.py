@@ -41,6 +41,7 @@ def check_device_drivers(device):
             subprocess.check_output('nvidia-smi')
         except Exception:
             return True
+        print("gpu drivers found")
     elif (device in ["metal", "vulkan"]):
         try:
             subprocess.check_output('vulkaninfo')
@@ -114,7 +115,7 @@ def get_iree_frontend_args(frontend):
 
 
 # input_type should be "mhlo", "tosa" for linalg no need to mention the frontend.
-def get_iree_module(module, device, input_type, args, func_name):
+def get_iree_module(module, device, input_type, args, func_name, device_idx):
     flatbuffer_blob = None
     # Compile according to the input type, else just try compiling.
     if input_type in ["mhlo", "tosa"]:
@@ -130,6 +131,7 @@ def get_iree_module(module, device, input_type, args, func_name):
             extra_args=args)
 
     vm_module = ireert.VmModule.from_flatbuffer(flatbuffer_blob)
+    ireert.flags.parse_flags("--cuda_default_index="+str(device_idx))
     config = ireert.Config(IREE_DEVICE_MAP[device])
     ctx = ireert.SystemContext(config=config)
     ctx.add_vm_module(vm_module)
@@ -140,7 +142,8 @@ def get_iree_module(module, device, input_type, args, func_name):
 def get_iree_compiled_module(module,
                              device: str,
                              frontend: str = "torch",
-                             func_name: str = "forward"):
+                             func_name: str = "forward",
+                             device_idx: int = 0):
     """Given a module returns the compiled .vmfb and configs"""
     input_type = ""
     args = get_iree_frontend_args(frontend)
@@ -156,7 +159,7 @@ def get_iree_compiled_module(module,
     elif frontend in ["tosa"]:
         input_type = "tosa"
 
-    return get_iree_module(module, device, input_type, args, func_name)
+    return get_iree_module(module, device, input_type, args, func_name, device_idx)
 
 
 def export_iree_module_to_vmfb(module, device: str, directory: str):

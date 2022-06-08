@@ -29,10 +29,12 @@ class SharkInference:
                  device: str = None,
                  dynamic: bool = False,
                  jit_trace: bool = False,
-                 benchmark_mode: bool = False):
+                 benchmark_mode: bool = False,
+                 device_idx: int = 0):
         self.model = model
         self.input = input
         self.dynamic = dynamic
+        self.device_idx = device_idx
         self.jit_trace = jit_trace
         self.benchmark_mode = benchmark_mode
 
@@ -60,12 +62,12 @@ class SharkInference:
             self.shark_runner = SharkBenchmarkRunner(self.model, self.input,
                                                      self.dynamic, self.device,
                                                      self.jit_trace, from_aot,
-                                                     self.frontend)
+                                                     self.frontend, self.device_idx)
         else:
             self.shark_runner = SharkRunner(self.model, self.input,
                                             self.dynamic, self.device,
                                             self.jit_trace, from_aot,
-                                            self.frontend)
+                                            self.frontend, self.device_idx)
 
     # inputs are considered to be np.array.
     def forward(self, inputs):

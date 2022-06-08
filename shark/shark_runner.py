@@ -37,6 +37,7 @@ class SharkRunner:
         jit_trace: bool = False,
         from_aot: bool = False,
         frontend: str = "torch",
+        device_idx: int = 0,
     ):
         self.model = model
         self.frontend_model = model
@@ -45,20 +46,22 @@ class SharkRunner:
         self.frontend = frontend
         self.vmfb_file = None
         device = device if device is not None else shark_args.device
+        self.device_idx = device_idx
         if self.frontend in ["pytorch", "torch"]:
             self.model = get_torch_mlir_module(self.model, input, dynamic,
                                                jit_trace, from_aot)
         (
             self.iree_compilation_module,
             self.iree_config,
-        ) = get_iree_compiled_module(self.model, device)
+        ) = get_iree_compiled_module(self.model, device, device_idx=self.device_idx)
 
         # Debugging Options:
         if shark_args.save_mlir:
             export_module_to_mlir_file(self.model, shark_args.repro_dir)
-        if shark_args.save_mlir:
+
+        if True:#if shark_args.save_mlir:
             self.vmfb_file = export_iree_module_to_vmfb(self.model, device,
-                                                        shark_args.repro_dir)
+                                                        "/home/dan/tmp/")
 
     # All the timings and benchmarking can be done here.
     def forward(self, input, frontend):
