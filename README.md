@@ -3,6 +3,7 @@
 High Performance Machine Learning and Data Analytics for CPUs, GPUs, Accelerators and Heterogeneous Clusters
 
 [![Nightly Release](https://github.com/nod-ai/SHARK/actions/workflows/nightly.yml/badge.svg)](https://github.com/nod-ai/SHARK/actions/workflows/nightly.yml)
+[![Validate torch-models on Shark Runtime](https://github.com/nod-ai/SHARK/actions/workflows/test-models.yml/badge.svg)](https://github.com/nod-ai/SHARK/actions/workflows/test-models.yml)
 
 ## Communication Channels
 
@@ -30,7 +31,7 @@ source shark_venv/bin/activate
 python -m pip install --upgrade pip
 ```
 
-*macOS Metal* users please install https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg
+*macOS Metal* users please install https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg and enable "System wide install"
 
 ### Install SHARK
   
@@ -82,12 +83,17 @@ python -m  shark.examples.shark_inference.resnet50_script --device="cpu" # Use g
 ```
 
 
-### Run all tests on CPU/GPU/VULKAN/Metal
+### Run all model tests on CPU/GPU/VULKAN/Metal
 ```shell
-pytest
+pytest shark/tests/models
 
 # If on Linux for quicker results:
-pytest --workers auto
+pytest shark/tests/models -n auto
+```
+
+### Run all model benchmark tests on CPU/GPU/VULKAN/Metal
+```shell
+pytest shark/tests/benchmarks
 ```
 </details>
 
@@ -147,34 +153,34 @@ print(shark_module.forward((arg0, arg1)))
 
 | Hugging Face Models | Torch-MLIR lowerable | SHARK-CPU | SHARK-CUDA | SHARK-METAL |
 |---------------------|----------------------|----------|----------|-------------|
-| BERT                | :heavy_check_mark: (JIT)          | :heavy_check_mark:         |          |             |
-| Albert              | :heavy_check_mark: (JIT)            | :heavy_check_mark:         |          |             |
+| BERT                | :heavy_check_mark: (JIT)          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| Albert              | :heavy_check_mark: (JIT)            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
 | BigBird             | :heavy_check_mark: (AOT)            |          |          |             |
-| DistilBERT          | :heavy_check_mark: (JIT)            | :heavy_check_mark:         |          |             |
+| DistilBERT          | :heavy_check_mark: (JIT)            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
 | GPT2                | :x: (AOT)            |          |          |             |
 
 ### Torchvision  Models
   
 | TORCHVISION Models | Torch-MLIR lowerable | SHARK-CPU | SHARK-CUDA | SHARK-METAL |
 |--------------------|----------------------|----------|----------|-------------|
-| AlexNet            | :heavy_check_mark: (Script)         | :heavy_check_mark:         | :heavy_check_mark:         |             |
+| AlexNet            | :heavy_check_mark: (Script)         | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
 | DenseNet121        | :heavy_check_mark: (Script)         |          |          |             |
 | MNasNet1_0         | :heavy_check_mark: (Script)         |          |          |             |
 | MobileNetV2        | :heavy_check_mark: (Script)         |          |          |             |
 | MobileNetV3        | :heavy_check_mark: (Script)         |          |          |             |
 | Unet               | :x: (Script)         |          |          |             |
-| Resnet18           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |  :heavy_check_mark:        |             |
-| Resnet50           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       |             |
-| Resnet101           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       |             |
+| Resnet18           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |  :heavy_check_mark:        | :heavy_check_mark:            |
+| Resnet50           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       | :heavy_check_mark:            |
+| Resnet101           | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       | :heavy_check_mark:            |
 | Resnext50_32x4d    | :heavy_check_mark: (Script)         |          |          |             |
 | ShuffleNet_v2      | :x: (Script)         |          |          |             |
-| SqueezeNet         | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       |             |
+| SqueezeNet         | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       | :heavy_check_mark:            |
 | EfficientNet       | :heavy_check_mark: (Script)         |          |          |             |
 | Regnet             | :heavy_check_mark: (Script)         |          |          |             |
 | Resnest            | :x: (Script)         |          |          |             |
 | Vision Transformer | :heavy_check_mark: (Script)         |          |          |             |
 | VGG 16             | :heavy_check_mark: (Script)         | :heavy_check_mark:         |   :heavy_check_mark:       |             |
-| Wide Resnet        | :heavy_check_mark: (Script)         | :heavy_check_mark:         | :heavy_check_mark:         |             |
+| Wide Resnet        | :heavy_check_mark: (Script)         | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
 | RAFT               | :x: (JIT)            |          |          |             |
 
 For more information refer to [MODEL TRACKING SHEET](https://docs.google.com/spreadsheets/d/15PcjKeHZIrB5LfDyuw7DGEEE8XnQEX2aX8lm8qbxV8A/edit#gid=0)
@@ -216,12 +222,27 @@ For more information refer to [MODEL TRACKING SHEET](https://docs.google.com/spr
 <details>
   <summary>TF Models</summary>
  
-### Tensorflow Models 
+### Tensorflow Models (Inference) 
 
-| Models | Torch-MLIR lowerable | SHARK-CPU | SHARK-CUDA | SHARK-METAL |
+| Hugging Face Models | tf-mhlo lowerable | SHARK-CPU | SHARK-CUDA | SHARK-METAL |
 |---------------------|----------------------|----------|----------|-------------|
-| BERT                | :x:           | :x:         |          |             |
-| FullyConnected                | :heavy_check_mark:           | :heavy_check_mark:         |          |             |
+| BERT                | :heavy_check_mark:          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| albert-base-v2              | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| DistilBERT          | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| CamemBert                | :heavy_check_mark:          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| ConvBert              | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| Deberta              |            |         |          |             |
+| electra          | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| funnel              |            |         |          |             |
+| layoutlm              | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| longformer              |            |         |          |             |
+| mobile-bert                | :heavy_check_mark:          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| remembert              |            |         |          |             |
+| tapas              |            |         |          |             |
+| flaubert                | :heavy_check_mark:          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| roberta                | :heavy_check_mark:          | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| xlm-roberta              | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
+| mpnet              | :heavy_check_mark:            | :heavy_check_mark:         | :heavy_check_mark:         | :heavy_check_mark:            |
   
 </details>
 

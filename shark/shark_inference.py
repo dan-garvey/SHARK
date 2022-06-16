@@ -10,10 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from shark.torch_mlir_utils import get_torch_mlir_module, run_on_refbackend
-import os
 from shark.parser import shark_args
 from shark.shark_runner import SharkRunner, SharkBenchmarkRunner
-import time
 import sys
 
 
@@ -51,7 +49,8 @@ class SharkInference:
     # Sets the frontend i.e `pytorch` or `tensorflow`.
     def set_frontend(self, frontend: str):
         if frontend not in [
-                "pytorch", "torch", "tensorflow", "tf", "mhlo", "linalg", "tosa", "tflite"
+                "pytorch", "torch", "tensorflow", "tf", "mhlo", "linalg",
+                "tosa", "tflite"
         ]:
             print_err("frontend not supported.")
         else:
@@ -82,6 +81,12 @@ class SharkInference:
             input_list = [x.numpy() for x in inputs]
         return self.shark_runner.forward(input_list, self.frontend)
 
+    # Saves the .vmfb module.
+    def save_module(self, dir=None):
+        if dir is None:
+            return self.shark_runner.save_module()
+        return self.shark_runner.save_module(dir)
+
     ######### Benchmark Related Functions #########
     def benchmark_mode(func):
 
@@ -94,3 +99,15 @@ class SharkInference:
     @benchmark_mode
     def benchmark_all(self, inputs):
         self.shark_runner.benchmark_all(inputs)
+
+    @benchmark_mode
+    def benchmark_frontend(self, inputs):
+        self.shark_runner.benchmark_frontend(inputs)
+
+    @benchmark_mode
+    def benchmark_python(self, inputs):
+        self.shark_runner.benchmark_python(inputs)
+
+    @benchmark_mode
+    def benchmark_c(self):
+        self.shark_runner.benchmark_c()
