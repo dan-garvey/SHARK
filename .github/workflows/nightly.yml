@@ -72,6 +72,7 @@ jobs:
         pip wheel -v -w wheelhouse . --extra-index-url https://download.pytorch.org/whl/nightly/cpu  -f https://github.com/llvm/torch-mlir/releases -f https://github.com/nod-ai/SHARK-Runtime/releases
         # Install the built wheel
         pip install ./wheelhouse/nodai*
+        python generate_sharktank.py --upload=true
         # Validate the Models
         pytest -k 'not benchmark' --ignore=benchmarks/tests/test_hf_benchmark.py --ignore=benchmarks/tests/test_benchmark.py --ignore=shark/tests/test_shark_importer.py --ignore=tank/tf/
     
